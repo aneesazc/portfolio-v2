@@ -3,31 +3,129 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Anees — Editor</title>
+  <title>Anees — Video Editor</title>
+  <meta name="description" content="Video editor and motion designer. Talking-head, long-form, VSL and explainer editing, with motion design when the story needs it." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --black:   #0A0A0A;
-      --surface: #111111;
-      --rule:    #1E1E1E;
-      --white:   #F0EDE8;
-      --muted:   #7A7571;
-      --amber:   #E8A838;
-      --radius:  4px;
+      --void:      #05070E;
+      --deep:      #080C18;
+      --surface:   #0D1426;
+      --surface-2: #111B33;
+      --line:      #1B2842;
+      --line-dim:  #141E36;
+
+      --blue:      #3B7BFF;
+      --blue-hi:   #6098FF;
+      --blue-dim:  #1E3766;
+
+      --text:      #E7ECF6;
+      --text-soft: #A6B2C9;
+      --muted:     #68758F;
+
+      --radius: 4px;
+      --rail: 96px;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--black);
-      color: var(--white);
-      font-family: 'Inter', sans-serif;
-      font-weight: 300;
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Inter Tight', system-ui, sans-serif;
+      font-weight: 400;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ambient blue field */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(900px 620px at 12% -6%, rgba(59,123,255,0.16), transparent 62%),
+        radial-gradient(700px 560px at 96% 22%, rgba(59,123,255,0.07), transparent 60%),
+        linear-gradient(180deg, rgba(13,20,38,0.55) 0%, transparent 42%);
+    }
+    /* faint grid */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(to right, rgba(59,123,255,0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(59,123,255,0.045) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 78%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 78%);
+    }
+
+    nav, section, footer, .rail, .overlay, .edit-banner { position: relative; z-index: 2; }
+
+    ::selection { background: var(--blue); color: #fff; }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--blue-hi); outline-offset: 3px; }
+
+    .mono {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── TIMELINE RAIL ── */
+    .rail {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--rail);
+      height: 100vh;
+      z-index: 50;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .rail-line { position: relative; width: 1px; height: 60vh; background: var(--line); }
+    .rail-tick { position: absolute; left: 0; width: 6px; height: 1px; background: var(--line); }
+    .rail-tick.major { width: 13px; background: #24345A; }
+    .rail-head {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(59,123,255,0.18), 0 0 14px rgba(59,123,255,0.75);
+      transition: top 0.08s linear;
+    }
+    .rail-tc {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+    .rail-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
     }
 
     /* ── NAV ── */
@@ -37,31 +135,40 @@
       z-index: 100;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 24px 48px;
-      background: linear-gradient(to bottom, rgba(10,10,10,0.92) 0%, transparent 100%);
+      align-items: baseline;
+      padding: 24px 40px 24px calc(var(--rail) + 8px);
+      background: linear-gradient(to bottom, var(--void) 45%, rgba(5,7,14,0) 100%);
     }
-
     .nav-logo {
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--white);
+      font-family: 'Instrument Serif', serif;
+      font-size: 20px;
       text-decoration: none;
-      opacity: 0.6;
+      color: var(--text);
+    }
+    .nav-right { display: flex; gap: 26px; align-items: baseline; }
+    .nav-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--muted);
+      transition: color 0.18s;
+    }
+    .nav-link:hover { color: var(--text); }
+    .nav-link.is-cta { color: var(--text); }
+    .nav-link.is-cta::after {
+      content: '';
+      display: block;
+      height: 1px;
+      margin-top: 3px;
+      background: var(--blue);
+      box-shadow: 0 0 8px rgba(59,123,255,0.8);
     }
 
-    .nav-contact {
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--white);
-      text-decoration: none;
-      opacity: 0.5;
-      transition: opacity 0.2s;
-    }
-    .nav-contact:hover { opacity: 1; }
+    /* ── LAYOUT ── */
+    .wrap { padding-left: var(--rail); padding-right: 40px; max-width: 1440px; }
+    section { scroll-margin-top: 80px; }
 
     /* ── HERO ── */
     #hero {
@@ -69,625 +176,723 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 0 48px;
-      position: relative;
-      overflow: hidden;
+      padding-top: 100px;
+      padding-bottom: 56px;
     }
-
-    .hero-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      width: 100%;
-      animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
-    }
-
     .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 11px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 28px;
+      color: var(--muted);
+      margin-bottom: 26px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 10px rgba(59,123,255,0.9);
     }
 
-    .hero-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: clamp(72px, 10vw, 148px);
-      line-height: 0.92;
-      color: var(--white);
-      margin-bottom: 32px;
+    .hero-h1 {
+      font-family: 'Instrument Serif', serif;
+      font-weight: 400;
+      font-size: clamp(58px, 11.5vw, 170px);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
     }
-
-    .hero-name em {
+    .hero-h1 em {
       font-style: italic;
-      color: var(--amber);
-    }
-
-    .hero-rule {
-      width: 64px;
-      height: 1px;
-      background: var(--muted);
-      margin-bottom: 28px;
+      display: block;
+      font-size: clamp(28px, 5vw, 70px);
+      color: var(--blue-hi);
+      line-height: 1.06;
+      margin-top: 12px;
+      letter-spacing: -0.01em;
     }
 
     .hero-desc {
-      font-size: 15px;
-      line-height: 1.7;
-      color: var(--muted);
-      max-width: 400px;
-      margin-bottom: 48px;
+      font-size: clamp(16px, 1.55vw, 20px);
+      line-height: 1.62;
+      color: var(--text-soft);
+      max-width: 48ch;
+      margin-top: 38px;
+      font-weight: 300;
     }
+    .hero-desc strong { font-weight: 500; color: var(--text); }
 
-    .btn-primary {
-      display: inline-block;
-      padding: 14px 36px;
-      border: 1px solid var(--amber);
-      color: var(--amber);
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 400;
-      letter-spacing: 0.16em;
+    .hero-actions { display: flex; align-items: center; gap: 18px; margin-top: 40px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.13em;
       text-transform: uppercase;
       text-decoration: none;
-      transition: background 0.22s, color 0.22s;
+      padding: 13px 22px;
       border-radius: var(--radius);
+      transition: all 0.2s;
     }
-    .btn-primary:hover {
-      background: var(--amber);
-      color: var(--black);
+    .btn-solid {
+      background: var(--blue);
+      color: #fff;
+      border: 1px solid var(--blue);
+      box-shadow: 0 0 0 rgba(59,123,255,0);
     }
+    .btn-solid:hover {
+      background: var(--blue-hi);
+      border-color: var(--blue-hi);
+      box-shadow: 0 6px 26px rgba(59,123,255,0.32);
+    }
+    .btn-ghost { color: var(--text-soft); border: 1px solid var(--line); }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--text); }
 
-    .hero-scroll {
-      position: absolute;
-      bottom: 40px;
-      left: 48px;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .hero-scroll::before {
-      content: '';
+    /* ── CAPABILITY STRIP ── */
+    .strip { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line-dim); margin-top: 62px; }
+    .strip-item { flex: 1 1 190px; padding: 18px 24px 18px 0; border-right: 1px solid var(--line-dim); }
+    .strip-item:last-child { border-right: none; }
+    .strip-item span {
       display: block;
-      width: 32px;
-      height: 1px;
-      background: var(--muted);
-    }
-
-    /* ── SECTION SHARED ── */
-    section { padding: 100px 48px; }
-
-    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 10px;
-      letter-spacing: 0.24em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 56px;
+      color: var(--blue);
+      margin-bottom: 7px;
+    }
+    .strip-item p { font-size: 14px; color: var(--text-soft); font-weight: 300; line-height: 1.45; }
+
+    /* ── SECTION HEAD ── */
+    .sec-head {
       display: flex;
-      align-items: center;
-      gap: 16px;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 24px;
+      padding-bottom: 18px;
+      margin-bottom: 44px;
+      border-bottom: 1px solid var(--line-dim);
     }
-    .section-label::after {
-      content: '';
-      display: block;
-      flex: 1;
-      max-width: 48px;
-      height: 1px;
-      background: var(--amber);
-      opacity: 0.4;
+    .sec-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(28px, 3.4vw, 42px);
+      font-weight: 400;
+      letter-spacing: -0.01em;
     }
+    .sec-title em { font-style: italic; color: var(--blue-hi); }
 
     /* ── WORK ── */
-    #work { background: var(--black); }
+    #work { padding: 120px 0 40px; }
+    .video-card { margin-bottom: 54px; }
 
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .video-card {
+    .frame {
       position: relative;
+      width: 100%;
       background: var(--surface);
       border-radius: var(--radius);
       overflow: hidden;
-      border: 1px solid var(--rule);
+      border: 1px solid var(--line);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .video-card:hover .frame {
+      border-color: var(--blue-dim);
+      box-shadow: 0 0 0 1px rgba(59,123,255,0.18), 0 18px 60px -24px rgba(59,123,255,0.35);
+    }
+    .frame.wide { padding-top: 56.25%; }
+    .frame.tall { padding-top: 177.78%; }
+    .frame iframe, .frame .ph {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
     }
 
-    /* 9:16 aspect ratio for reels */
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      padding-top: 177.78%;
-      background: var(--surface);
+    .ph {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px;
+      background:
+        radial-gradient(340px 200px at 50% 45%, rgba(59,123,255,0.08), transparent 70%),
+        var(--surface);
+      color: var(--muted);
     }
-
-    .video-wrapper iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    .ph svg { width: 15px; height: 15px; fill: var(--blue); opacity: 0.8; }
+    .ph span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
     }
+    .ph.hidden { display: none; }
 
-    /* Placeholder state */
-    .video-placeholder {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+    .meta {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: var(--surface);
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line-dim);
     }
-
-    .video-placeholder.hidden { display: none; }
-
-    .placeholder-icon {
-      width: 48px;
-      height: 48px;
-      border: 1.5px solid var(--rule);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .placeholder-icon svg {
-      width: 16px;
-      height: 16px;
-      fill: var(--muted);
-      margin-left: 3px;
-    }
-
-    .placeholder-text {
+    .meta-left { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    .meta-idx {
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 11px;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+    .meta-title { font-size: 16px; font-weight: 500; letter-spacing: -0.005em; }
+    .meta-tags {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
-      opacity: 0.5;
+      white-space: nowrap;
     }
+    .featured .meta-title { font-size: 20px; }
 
-    /* Edit overlay (only shows on hover for easy editing) */
-    .video-edit-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      background: rgba(10,10,10,0.85);
-      border: 1px solid var(--rule);
-      color: var(--muted);
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 6px 12px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s;
-      z-index: 10;
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+    .grid-2 .video-card { margin-bottom: 40px; }
+
+
+    /* vertical row */
+    .vert-row {
+      display: flex;
+      justify-content: center;
+      padding-top: 8px;
     }
-    .video-card:hover .video-edit-btn { opacity: 1; }
-    .video-edit-btn:hover { color: var(--white); border-color: var(--muted); }
+    .vert-row .video-card { width: 100%; max-width: 340px; }
+
 
     /* ── CONTACT ── */
-    #contact {
-      background: var(--surface);
-      border-top: 1px solid var(--rule);
+    #contact { padding: 110px 0 90px; border-top: 1px solid var(--line-dim); }
+    .contact-h {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(38px, 6vw, 76px);
+      font-weight: 400;
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
     }
-
-    .contact-inner {
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    .contact-heading {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: clamp(40px, 6vw, 72px);
-      line-height: 1;
-      color: var(--white);
-      margin-bottom: 16px;
-    }
-
-    .contact-heading em {
-      font-style: italic;
-      color: var(--amber);
-    }
-
+    .contact-h em { font-style: italic; color: var(--blue-hi); }
     .contact-sub {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-      margin-bottom: 52px;
+      font-size: 16px;
+      color: var(--text-soft);
+      max-width: 46ch;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 42px;
     }
-
-    .social-links {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .social-link {
+    .links { border-top: 1px solid var(--line-dim); max-width: 620px; }
+    .link {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 0;
-      border-bottom: 1px solid var(--rule);
+      padding: 17px 4px 17px 0;
+      border-bottom: 1px solid var(--line-dim);
       text-decoration: none;
-      transition: border-color 0.2s;
+      transition: padding 0.22s;
     }
-    .social-link:first-child { border-top: 1px solid var(--rule); }
-    .social-link:hover { border-color: var(--muted); }
-    .social-link:hover .social-name { color: var(--white); }
-    .social-link:hover .social-arrow { color: var(--amber); transform: translate(3px, -3px); }
-
-    .social-left {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .social-platform {
+    .link:hover { padding-left: 10px; }
+    .link:hover .link-name { color: var(--blue-hi); }
+    .link:hover .link-arrow { color: var(--blue); transform: translate(2px, -2px); }
+    .link-l { display: flex; align-items: baseline; gap: 16px; }
+    .link-plat {
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 10px;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--muted);
-      width: 80px;
+      width: 78px;
       flex-shrink: 0;
     }
-
-    .social-name {
-      font-size: 15px;
-      font-weight: 300;
-      color: var(--muted);
-      transition: color 0.2s;
-    }
-
-    .social-arrow {
-      font-size: 16px;
-      color: var(--muted);
-      transition: color 0.2s, transform 0.2s;
-    }
+    .link-name { font-size: 15px; color: var(--text); transition: color 0.18s; }
+    .link-arrow { font-size: 15px; color: var(--muted); transition: transform 0.22s, color 0.18s; }
 
     /* ── FOOTER ── */
     footer {
-      padding: 28px 48px;
-      border-top: 1px solid var(--rule);
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      gap: 16px;
+      padding: 22px 40px 22px calc(var(--rail));
+      border-top: 1px solid var(--line-dim);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      max-width: 1440px;
     }
 
-    footer p {
-      font-size: 11px;
+    /* ── EDIT MODE ── */
+    .edit-btn { display: none; }
+    body.edit-mode .edit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      background: none;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       color: var(--muted);
-      opacity: 0.4;
-      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    body.edit-mode .edit-btn:hover { color: var(--blue-hi); border-color: var(--blue); }
+
+    .edit-banner { display: none; }
+    body.edit-mode .edit-banner {
+      display: block;
+      position: fixed;
+      bottom: 16px; right: 16px;
+      z-index: 300;
+      background: var(--blue);
+      color: #fff;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 13px;
+      border-radius: var(--radius);
     }
 
     /* ── MODAL ── */
-    .modal-overlay {
+    .overlay {
       display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 200;
+      position: fixed; inset: 0;
+      background: rgba(5,7,14,0.78);
+      backdrop-filter: blur(4px);
+      z-index: 400;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
-    .modal-overlay.active { display: flex; }
-
+    .overlay.active { display: flex; }
     .modal {
       background: var(--surface);
-      border: 1px solid var(--rule);
+      border: 1px solid var(--line);
       border-radius: 6px;
-      padding: 32px;
-      width: 90%;
-      max-width: 480px;
+      padding: 28px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 30px 80px -30px rgba(0,0,0,0.9);
     }
-
-    .modal h3 {
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 8px;
-    }
-
-    .modal p {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
+    .modal h3 { font-family: 'Instrument Serif', serif; font-size: 24px; font-weight: 400; margin-bottom: 6px; }
+    .modal p { font-size: 13.5px; color: var(--text-soft); margin-bottom: 18px; line-height: 1.55; font-weight: 300; }
     .modal input {
       width: 100%;
-      background: var(--black);
-      border: 1px solid var(--rule);
-      color: var(--white);
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      padding: 12px 16px;
+      background: var(--deep);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      padding: 12px 14px;
       border-radius: var(--radius);
       outline: none;
-      margin-bottom: 16px;
-      transition: border-color 0.2s;
+      margin-bottom: 14px;
     }
-    .modal input:focus { border-color: var(--amber); }
-    .modal input::placeholder { color: var(--muted); opacity: 0.5; }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .modal-btn {
+    .modal input:focus { border-color: var(--blue); }
+    .modal input::placeholder { color: var(--muted); }
+    .modal-actions { display: flex; gap: 9px; }
+    .m-btn {
       flex: 1;
       padding: 11px;
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       border-radius: var(--radius);
       cursor: pointer;
-      border: 1px solid var(--rule);
+      border: 1px solid var(--line);
       background: transparent;
-      color: var(--muted);
-      transition: color 0.2s, border-color 0.2s;
+      color: var(--text-soft);
+      transition: all 0.18s;
     }
-    .modal-btn:hover { color: var(--white); border-color: var(--muted); }
+    .m-btn:hover { border-color: var(--blue); color: var(--text); }
+    .m-btn.go { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .m-btn.go:hover { background: var(--blue-hi); border-color: var(--blue-hi); }
 
-    .modal-btn.confirm {
-      background: var(--amber);
-      color: var(--black);
-      border-color: var(--amber);
-      font-weight: 500;
-    }
-    .modal-btn.confirm:hover { opacity: 0.85; }
-
-    /* ── ANIMATION ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
 
     @media (prefers-reduced-motion: reduce) {
-      .hero-inner { animation: none; }
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .rail-head { transition: none; }
     }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      nav { padding: 20px 24px; }
-      #hero { padding: 0 24px; }
-      .hero-scroll { left: 24px; }
-      section { padding: 72px 24px; }
-      .video-grid { grid-template-columns: 1fr; }
-      footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+    @media (max-width: 980px) {
+      .grid-2 { grid-template-columns: 1fr; gap: 0; }
+      .vert-row .video-card { max-width: 320px; }
+    }
+    @media (max-width: 760px) {
+      :root { --rail: 0px; }
+      .rail { display: none; }
+      nav { padding: 18px 22px; }
+      .wrap { padding-left: 22px; padding-right: 22px; }
+      footer { padding: 20px 22px; flex-direction: column; gap: 6px; }
+      .strip-item { flex: 1 1 100%; border-right: none; border-bottom: 1px solid var(--line-dim); }
+      .strip-item:last-child { border-bottom: none; }
+      #work { padding-top: 80px; }
+      .nav-right { gap: 16px; }
+      body::after { background-size: 48px 48px; }
     }
   </style>
 </head>
 <body>
 
+<!-- TIMELINE RAIL -->
+<div class="rail" aria-hidden="true">
+  <div class="rail-label">Timeline</div>
+  <div class="rail-line" id="railLine">
+    <div class="rail-head" id="railHead" style="top:0%"></div>
+  </div>
+  <div class="rail-tc" id="railTc">00:00</div>
+</div>
+
 <!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">Anees</a>
-  <a href="#contact" class="nav-contact">Get in touch</a>
+  <div class="nav-right">
+    <a href="#work" class="nav-link">Work</a>
+    <a href="#contact" class="nav-link is-cta">Get in touch</a>
+  </div>
 </nav>
 
 <!-- HERO -->
-<section id="hero">
-  <div class="hero-inner">
-    <p class="hero-eyebrow">Video Editor</p>
-    <h1 class="hero-name">
-      Anees<br>
-      <em>Edits.</em>
+<section id="hero" class="wrap">
+  <div>
+    <p class="hero-eyebrow">Video editor &nbsp;·&nbsp; Motion designer</p>
+    <h1 class="hero-h1">
+      Anees
+      <em>Cuts that hold.</em>
     </h1>
-    <div class="hero-rule"></div>
-    <p class="hero-desc">Short-form reels and talking head videos built to hook, hold, and convert. Minimal. Purposeful. Sharp.</p>
-    <a href="#contact" class="btn-primary">Work with me</a>
+    <p class="hero-desc">
+      I edit talking-head, long-form, VSL and short-form video — and build motion graphics when the story
+      needs them. <strong>The edit carries the story.</strong> Motion only shows up when it makes the point land harder.
+    </p>
+    <div class="hero-actions">
+      <a href="#work" class="btn btn-solid">See the work</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+
+    <div class="strip">
+      <div class="strip-item">
+        <span>Editing</span>
+        <p>Talking-head · long-form · VSL · short-form</p>
+      </div>
+      <div class="strip-item">
+        <span>Motion design</span>
+        <p>Explainer graphics · kinetic type · UI animation</p>
+      </div>
+      <div class="strip-item">
+        <span>Tools</span>
+        <p>Premiere Pro · After Effects</p>
+      </div>
+    </div>
   </div>
-  <div class="hero-scroll">Scroll</div>
 </section>
 
 <!-- WORK -->
-<section id="work">
-  <p class="section-label">Selected work</p>
-  <div class="video-grid">
+<section id="work" class="wrap">
+  <div class="sec-head">
+    <h2 class="sec-title">Selected <em>work</em></h2>
+    <span class="mono">Six pieces</span>
+  </div>
 
-    <!-- Card 1 -->
-    <div class="video-card" id="card-0">
-      <div class="video-wrapper">
-        <div class="video-placeholder hidden" id="placeholder-0">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
-          </div>
-          <span class="placeholder-text">Reel 01</span>
-        </div>
-        <div id="embed-0"><iframe src="https://www.youtube.com/embed/neg_QvidP74?rel=0&modestbranding=1&controls=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+  <!-- 01 — EDIT LOBBY (featured, 16:9) -->
+  <div class="video-card featured reveal" id="card-0">
+    <div class="frame wide">
+      <div class="ph hidden" id="ph-0">
+        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+        <span>Slot 01</span>
       </div>
-      <button class="video-edit-btn" onclick="openModal(0)">↺ Change video</button>
+      <div id="embed-0">
+        <iframe src="https://www.youtube.com/embed/bSIjCVAYWtY?rel=0&modestbranding=1" title="Edit Lobby — brand sample" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="meta-left">
+        <span class="meta-idx">01</span>
+        <span class="meta-title">Edit Lobby — brand sample</span>
+      </div>
+      <span class="meta-tags">16:9 · Edit · Motion · Sound</span>
+    </div>
+    <button class="edit-btn" onclick="openModal(0)">↺ Change video</button>
+  </div>
+
+  <!-- 02 + 03 — TALKING HEAD (16:9) -->
+  <div class="grid-2">
+
+    <div class="video-card reveal" id="card-1">
+      <div class="frame wide">
+        <div class="ph hidden" id="ph-1">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+          <span>Slot 02</span>
+        </div>
+        <div id="embed-1">
+        <iframe src="https://www.youtube.com/embed/7r-3_EGDmbc?rel=0&modestbranding=1" title="Talking head" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      </div>
+      <div class="meta">
+        <div class="meta-left">
+          <span class="meta-idx">02</span>
+          <span class="meta-title">Talking head</span>
+        </div>
+        <span class="meta-tags">16:9 · Edit · Sound</span>
+      </div>
+      <button class="edit-btn" onclick="openModal(1)">↺ Change video</button>
     </div>
 
-    <!-- Card 2 -->
-    <div class="video-card" id="card-1">
-      <div class="video-wrapper">
-        <div class="video-placeholder hidden" id="placeholder-1">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
-          </div>
-          <span class="placeholder-text">Reel 02</span>
+    <div class="video-card reveal" id="card-2">
+      <div class="frame wide">
+        <div class="ph hidden" id="ph-2">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+          <span>Slot 03</span>
         </div>
-        <div id="embed-1"><iframe src="https://www.youtube.com/embed/KtWUEE2wrew?rel=0&modestbranding=1&controls=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+        <div id="embed-2">
+        <iframe src="https://www.youtube.com/embed/VdjlGni_MnM?rel=0&modestbranding=1" title="Talking head" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
-      <button class="video-edit-btn" onclick="openModal(1)">↺ Change video</button>
-    </div>
-
-    <!-- Card 3 -->
-    <div class="video-card" id="card-2">
-      <div class="video-wrapper">
-        <div class="video-placeholder hidden" id="placeholder-2">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
-          </div>
-          <span class="placeholder-text">Reel 03</span>
+      </div>
+      <div class="meta">
+        <div class="meta-left">
+          <span class="meta-idx">03</span>
+          <span class="meta-title">Talking head</span>
         </div>
-        <div id="embed-2"><iframe src="https://www.youtube.com/embed/taQDWFyOgYs?rel=0&modestbranding=1&controls=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+        <span class="meta-tags">16:9 · Edit · Sound</span>
       </div>
-      <button class="video-edit-btn" onclick="openModal(2)">↺ Change video</button>
-    </div>
-
-    <!-- Card 4 -->
-    <div class="video-card" id="card-3">
-      <div class="video-wrapper">
-        <div class="video-placeholder" id="placeholder-3">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
-          </div>
-          <span class="placeholder-text">Reel 04</span>
-        </div>
-        <div id="embed-3"></div>
-      </div>
-      <button class="video-edit-btn" onclick="openModal(3)">+ Add video</button>
+      <button class="edit-btn" onclick="openModal(2)">↺ Change video</button>
     </div>
 
   </div>
+
+  <!-- 04 — VSL (16:9) -->
+  <div class="video-card reveal" id="card-3">
+    <div class="frame wide">
+      <div class="ph hidden" id="ph-3">
+        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+        <span>Slot 04 — VSL</span>
+      </div>
+      <div id="embed-3">
+        <iframe src="https://www.youtube.com/embed/Sf3EHr503pE?rel=0&modestbranding=1" title="VSL" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="meta-left">
+        <span class="meta-idx">04</span>
+        <span class="meta-title">VSL</span>
+      </div>
+      <span class="meta-tags">16:9 · Edit · Sound</span>
+    </div>
+    <button class="edit-btn" onclick="openModal(3)">↺ Change video</button>
+  </div>
+
+  <!-- 05 — MINIMAL ANIMATION (vertical 9:16) -->
+  <div class="vert-row">
+    <div class="video-card reveal" id="card-4">
+      <div class="frame tall">
+        <div class="ph hidden" id="ph-4">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+          <span>Slot 05 — vertical</span>
+        </div>
+        <div id="embed-4">
+        <iframe src="https://www.youtube.com/embed/vYIMYKbEZqg?rel=0&modestbranding=1" title="Minimal animation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      </div>
+      <div class="meta">
+        <div class="meta-left">
+          <span class="meta-idx">05</span>
+          <span class="meta-title">Minimal animation</span>
+        </div>
+        <span class="meta-tags">9:16 · Motion</span>
+      </div>
+      <button class="edit-btn" onclick="openModal(4)">↺ Change video</button>
+    </div>
+
+  </div>
+
+  <!-- 06 — SAAS (16:9, full width closer) -->
+  <div class="video-card reveal" id="card-5" style="margin-top:64px;">
+    <div class="frame wide">
+      <div class="ph hidden" id="ph-5">
+        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+        <span>Slot 06 — SaaS product</span>
+      </div>
+      <div id="embed-5">
+        <iframe src="https://www.youtube.com/embed/Qu7ioSluR7k?rel=0&modestbranding=1" title="SaaS product film" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="meta-left">
+        <span class="meta-idx">06</span>
+        <span class="meta-title">SaaS product film</span>
+      </div>
+      <span class="meta-tags">16:9 · Motion · UI</span>
+    </div>
+    <button class="edit-btn" onclick="openModal(5)">↺ Change video</button>
+  </div>
+
 </section>
+
 
 <!-- CONTACT -->
-<section id="contact">
-  <div class="contact-inner">
-    <p class="section-label">Contact</p>
-    <h2 class="contact-heading">Let's make<br>something <em>great.</em></h2>
-    <p class="contact-sub">Available for short-form projects, brand reels, and talking head edits. Reach out on any platform below.</p>
-    <div class="social-links">
-      <a class="social-link" href="https://instagram.com/anees.creates" target="_blank" rel="noopener">
-        <div class="social-left">
-          <span class="social-platform">Instagram</span>
-          <span class="social-name">@anees.creates</span>
-        </div>
-        <span class="social-arrow">↗</span>
-      </a>
-      <a class="social-link" href="https://youtube.com/@anees.creates" target="_blank" rel="noopener">
-        <div class="social-left">
-          <span class="social-platform">YouTube</span>
-          <span class="social-name">@anees.creates</span>
-        </div>
-        <span class="social-arrow">↗</span>
-      </a>
-      <a class="social-link" href="https://linkedin.com/in/aneesazc" target="_blank" rel="noopener">
-        <div class="social-left">
-          <span class="social-platform">LinkedIn</span>
-          <span class="social-name">aneesazc</span>
-        </div>
-        <span class="social-arrow">↗</span>
-      </a>
-      <a class="social-link" href="mailto:anees.azc@gmail.com">
-        <div class="social-left">
-          <span class="social-platform">Email</span>
-          <span class="social-name">anees.azc@gmail.com</span>
-        </div>
-        <span class="social-arrow">↗</span>
-      </a>
-    </div>
+<section id="contact" class="wrap">
+  <p class="mono" style="margin-bottom:22px;">Contact</p>
+  <h2 class="contact-h">Let's make<br>something <em>good.</em></h2>
+  <p class="contact-sub">
+    Open to editing and motion design work. Email is fastest.
+  </p>
+
+  <div class="links">
+    <a class="link" href="mailto:anees.azc@gmail.com">
+      <div class="link-l"><span class="link-plat">Email</span><span class="link-name">anees.azc@gmail.com</span></div>
+      <span class="link-arrow">↗</span>
+    </a>
+    <a class="link" href="https://instagram.com/anees.creates" target="_blank" rel="noopener">
+      <div class="link-l"><span class="link-plat">Instagram</span><span class="link-name">@anees.creates</span></div>
+      <span class="link-arrow">↗</span>
+    </a>
+    <a class="link" href="https://youtube.com/@anees.creates" target="_blank" rel="noopener">
+      <div class="link-l"><span class="link-plat">YouTube</span><span class="link-name">@anees.creates</span></div>
+      <span class="link-arrow">↗</span>
+    </a>
+    <a class="link" href="https://linkedin.com/in/aneesazc" target="_blank" rel="noopener">
+      <div class="link-l"><span class="link-plat">LinkedIn</span><span class="link-name">aneesazc</span></div>
+      <span class="link-arrow">↗</span>
+    </a>
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
-  <p>© 2025 Anees. All rights reserved.</p>
-  <p>Built for short-form storytelling.</p>
+  <p>© 2026 Anees</p>
+  <p>Video editing &amp; motion design</p>
 </footer>
 
-<!-- MODAL: Add YouTube video -->
-<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+<div class="edit-banner">Edit mode</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeOutside(event)">
   <div class="modal">
-    <h3>Add YouTube video</h3>
-    <p>Paste the YouTube URL or video ID for this slot. The video will embed directly — no title or caption shown.</p>
-    <input type="text" id="modal-input" placeholder="https://youtube.com/watch?v=... or video ID" />
+    <h3>Add a video</h3>
+    <p>Paste a YouTube URL or ID for this slot. Only you see this — visitors don't.</p>
+    <input type="text" id="mInput" placeholder="https://youtube.com/watch?v=… or ID" />
     <div class="modal-actions">
-      <button class="modal-btn" onclick="closeModal()">Cancel</button>
-      <button class="modal-btn confirm" onclick="embedVideo()">Embed</button>
+      <button class="m-btn" onclick="closeModal()">Cancel</button>
+      <button class="m-btn go" onclick="embedVideo()">Embed</button>
     </div>
   </div>
 </div>
 
 <script>
-  let activeSlot = null;
-
-  function openModal(slot) {
-    activeSlot = slot;
-    document.getElementById('modal-input').value = '';
-    document.getElementById('modal').classList.add('active');
-    setTimeout(() => document.getElementById('modal-input').focus(), 50);
+  /* EDIT MODE — controls only visible with ?edit in the URL */
+  if (new URLSearchParams(location.search).has('edit')) {
+    document.body.classList.add('edit-mode');
   }
 
+  /* TIMELINE RAIL */
+  (function () {
+    const line = document.getElementById('railLine');
+    const head = document.getElementById('railHead');
+    const tc   = document.getElementById('railTc');
+    if (!line) return;
+
+    for (let i = 0; i <= 40; i++) {
+      const t = document.createElement('div');
+      t.className = 'rail-tick' + (i % 5 === 0 ? ' major' : '');
+      t.style.top = (i / 40 * 100) + '%';
+      line.appendChild(t);
+    }
+
+    const fmt = p => {
+      const s = Math.round(p * 240);
+      return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    };
+
+    let ticking = false;
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      head.style.top = (p * 100) + '%';
+      tc.textContent = fmt(p);
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  })();
+
+  /* SCROLL REVEAL */
+  (function () {
+    const els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(e => io.observe(e));
+  })();
+
+  /* VIDEO SLOT MODAL */
+  let slot = null;
+
+  function openModal(i) {
+    slot = i;
+    document.getElementById('mInput').value = '';
+    document.getElementById('overlay').classList.add('active');
+    setTimeout(() => document.getElementById('mInput').focus(), 40);
+  }
   function closeModal() {
-    document.getElementById('modal').classList.remove('active');
-    activeSlot = null;
+    document.getElementById('overlay').classList.remove('active');
+    slot = null;
   }
-
-  function closeModalOutside(e) {
-    if (e.target === document.getElementById('modal')) closeModal();
+  function closeOutside(e) {
+    if (e.target === document.getElementById('overlay')) closeModal();
   }
-
-  function extractVideoId(input) {
+  function extractId(input) {
     input = input.trim();
-    // Already an ID (11 chars, no slashes)
     if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
-    // Full URL
     try {
       const url = new URL(input);
       if (url.hostname.includes('youtu.be')) return url.pathname.slice(1).split('?')[0];
+      if (url.pathname.includes('/shorts/')) return url.pathname.split('/shorts/')[1].slice(0, 11);
       return url.searchParams.get('v');
     } catch {
-      // shorts URL or partial
-      const match = input.match(/(?:shorts\/|v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      return match ? match[1] : null;
+      const m = input.match(/(?:shorts\/|v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
     }
   }
-
   function embedVideo() {
-    const input = document.getElementById('modal-input').value;
-    const id = extractVideoId(input);
+    const input = document.getElementById('mInput');
+    const id = extractId(input.value);
     if (!id) {
-      document.getElementById('modal-input').style.borderColor = '#e84848';
-      setTimeout(() => document.getElementById('modal-input').style.borderColor = '', 1000);
+      input.style.borderColor = '#E0574B';
+      setTimeout(() => input.style.borderColor = '', 900);
       return;
     }
-
-    const embedDiv = document.getElementById('embed-' + activeSlot);
-    const placeholder = document.getElementById('placeholder-' + activeSlot);
-    const editBtn = document.querySelector('#card-' + activeSlot + ' .video-edit-btn');
-
-    embedDiv.innerHTML = `<iframe
-      src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>`;
-
-    placeholder.classList.add('hidden');
-    editBtn.textContent = '↺ Change video';
-
+    document.getElementById('embed-' + slot).innerHTML =
+      `<iframe src="https://www.youtube.com/embed/${id}?rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    document.getElementById('ph-' + slot).classList.add('hidden');
+    const btn = document.querySelector('#card-' + slot + ' .edit-btn');
+    if (btn) btn.textContent = '↺ Change video';
     closeModal();
   }
-
-  // Allow Enter key in modal
-  document.getElementById('modal-input').addEventListener('keydown', function(e) {
+  document.getElementById('mInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') embedVideo();
     if (e.key === 'Escape') closeModal();
   });
-
-
 </script>
 
 </body>
