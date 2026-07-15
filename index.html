@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Anees — Video Editor &amp; Motion Designer</title>
+  <title>Anees — Video Editor</title>
   <meta name="description" content="Video editor and motion designer. Talking-head, long-form, VSL and explainer editing, with motion design when the story needs it." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -364,6 +364,24 @@
     }
     .vert-row .video-card { width: 100%; max-width: 340px; }
 
+    /* vertical pair: fit within viewport height, width follows */
+    .grid-verticals { align-items: start; }
+    .grid-verticals .video-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .grid-verticals .frame.tall {
+      padding-top: 0;                 /* drop the padding-ratio trick */
+      aspect-ratio: 9 / 16;           /* keep 9:16 via aspect-ratio instead */
+      height: min(82vh, 720px);       /* cap to viewport height */
+      width: auto;                    /* width derives from height + ratio */
+      max-width: 100%;
+    }
+    .grid-verticals .frame.tall iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .grid-verticals .meta { width: min(82vh * 9 / 16, 100%); }
+
+
 
     /* ── CONTACT ── */
     #contact { padding-top: 110px; padding-bottom: 90px; border-top: 1px solid var(--line-dim); }
@@ -602,7 +620,7 @@
       </div>
       <div class="strip-item">
         <span>Motion design</span>
-        <p>Explainer videos · kinetic type · UI animation</p>
+        <p>Explainer graphics · kinetic type · UI animation</p>
       </div>
       <div class="strip-item">
         <span>Tools</span>
@@ -658,7 +676,7 @@
           <span class="meta-idx">02</span>
           <span class="meta-title">Talking head</span>
         </div>
-        <span class="meta-tags">16:9 · Edit · Sound · Motion</span>
+        <span class="meta-tags">16:9 · Edit · Sound</span>
       </div>
       <button class="edit-btn" onclick="openModal(1)">↺ Change video</button>
     </div>
@@ -678,7 +696,7 @@
           <span class="meta-idx">03</span>
           <span class="meta-title">Talking head</span>
         </div>
-        <span class="meta-tags">16:9 · Edit · Sound · Motion · UI</span>
+        <span class="meta-tags">16:9 · Edit · Sound</span>
       </div>
       <button class="edit-btn" onclick="openModal(2)">↺ Change video</button>
     </div>
@@ -701,13 +719,14 @@
         <span class="meta-idx">04</span>
         <span class="meta-title">VSL</span>
       </div>
-      <span class="meta-tags">16:9 · Edit · Sound · Motion · UI</span>
+      <span class="meta-tags">16:9 · Edit · Sound</span>
     </div>
     <button class="edit-btn" onclick="openModal(3)">↺ Change video</button>
   </div>
 
-  <!-- 05 — MINIMAL ANIMATION (vertical 9:16) -->
-  <div class="vert-row">
+  <!-- 05 + 06 — VERTICAL ANIMATION (9:16) side by side -->
+  <div class="grid-2 grid-verticals">
+
     <div class="video-card reveal" id="card-4">
       <div class="frame tall">
         <div class="ph hidden" id="ph-4">
@@ -715,8 +734,8 @@
           <span>Slot 05 — vertical</span>
         </div>
         <div id="embed-4">
-        <iframe src="https://www.youtube.com/embed/vYIMYKbEZqg?rel=0&modestbranding=1" title="Minimal animation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
+          <iframe src="https://www.youtube.com/embed/vYIMYKbEZqg?rel=0&modestbranding=1" title="Minimal animation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
       </div>
       <div class="meta">
         <div class="meta-left">
@@ -728,73 +747,71 @@
       <button class="edit-btn" onclick="openModal(4)">↺ Change video</button>
     </div>
 
-  </div>
-
-  <!-- 06 — ANIMATION Showcase (vertical 9:16) -->
-  <div class="vert-row">
-    <div class="video-card reveal" id="card-4">
+    <div class="video-card reveal" id="card-5">
       <div class="frame tall">
-        <div class="ph hidden" id="ph-4">
+        <div class="ph hidden" id="ph-5">
           <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
           <span>Slot 06 — vertical</span>
         </div>
-        <div id="embed-4">
-        <iframe src="https://www.youtube.com/embed/5TZiPpvdo2w?rel=0&modestbranding=1" title="Animation Showcase" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
+        <div id="embed-5">
+          <iframe src="https://www.youtube.com/embed/5TZiPpvdo2w?rel=0&modestbranding=1" title="Animation Showcase" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
       </div>
       <div class="meta">
         <div class="meta-left">
           <span class="meta-idx">06</span>
-          <span class="meta-title">Animation Showcase</span>
+          <span class="meta-title">Animation showcase</span>
         </div>
         <span class="meta-tags">9:16 · Motion · UI</span>
       </div>
-      <button class="edit-btn" onclick="openModal(4)">↺ Change video</button>
+      <button class="edit-btn" onclick="openModal(5)">↺ Change video</button>
     </div>
 
   </div>
 
-  <!-- 07 — SAAS (16:9, full width closer) -->
-  <div class="video-card reveal" id="card-5" style="margin-top:64px;">
-    <div class="frame wide">
-      <div class="ph hidden" id="ph-5">
-        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
-        <span>Slot 07 — SaaS product</span>
-      </div>
-      <div id="embed-5">
-        <iframe src="https://www.youtube.com/embed/Qu7ioSluR7k?rel=0&modestbranding=1" title="SaaS product explainer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
-    </div>
-    <div class="meta">
-      <div class="meta-left">
-        <span class="meta-idx">06</span>
-        <span class="meta-title">SaaS product explainer</span>
-      </div>
-      <span class="meta-tags">9:16 · Motion · UI</span>
-    </div>
-    <button class="edit-btn" onclick="openModal(5)">↺ Change video</button>
-  </div>
+  <!-- 07 + 08 — SAAS (16:9) side by side -->
+  <div class="grid-2">
 
+    <div class="video-card reveal" id="card-6">
+      <div class="frame wide">
+        <div class="ph hidden" id="ph-6">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+          <span>Slot 07 — SaaS product</span>
+        </div>
+        <div id="embed-6">
+          <iframe src="https://www.youtube.com/embed/Qu7ioSluR7k?rel=0&modestbranding=1" title="SaaS product explainer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="meta-left">
+          <span class="meta-idx">07</span>
+          <span class="meta-title">SaaS product explainer</span>
+        </div>
+        <span class="meta-tags">16:9 · Motion · UI</span>
+      </div>
+      <button class="edit-btn" onclick="openModal(6)">↺ Change video</button>
+    </div>
 
-  <!-- 08 — SAAS (16:9, full width closer) -->
-  <div class="video-card reveal" id="card-5" style="margin-top:64px;">
-    <div class="frame wide">
-      <div class="ph hidden" id="ph-5">
-        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
-        <span>Slot 08 — SaaS product</span>
+    <div class="video-card reveal" id="card-7">
+      <div class="frame wide">
+        <div class="ph hidden" id="ph-7">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+          <span>Slot 08 — SaaS product</span>
+        </div>
+        <div id="embed-7">
+          <iframe src="https://www.youtube.com/embed/-45bM52FzIE?rel=0&modestbranding=1" title="SaaS product explainer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
       </div>
-      <div id="embed-5">
-        <iframe src="https://www.youtube.com/embed/-45bM52FzIE?rel=0&modestbranding=1" title="SaaS product explainer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <div class="meta">
+        <div class="meta-left">
+          <span class="meta-idx">08</span>
+          <span class="meta-title">SaaS product explainer</span>
+        </div>
+        <span class="meta-tags">16:9 · Motion · UI</span>
       </div>
+      <button class="edit-btn" onclick="openModal(7)">↺ Change video</button>
     </div>
-    <div class="meta">
-      <div class="meta-left">
-        <span class="meta-idx">06</span>
-        <span class="meta-title">SaaS product explainer</span>
-      </div>
-      <span class="meta-tags">16:9 · Motion · UI</span>
-    </div>
-    <button class="edit-btn" onclick="openModal(5)">↺ Change video</button>
+
   </div>
 
 </section>
