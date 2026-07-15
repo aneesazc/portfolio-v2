@@ -410,13 +410,17 @@
     .link-name { font-size: 15px; color: var(--text); transition: color 0.18s; }
     .link-arrow { font-size: 15px; color: var(--muted); transition: transform 0.22s, color 0.18s; }
 
-    /* contact sits right-of-centre on wide screens */
+    /* contact centred on wide screens */
     #contact .contact-inner {
       max-width: 720px;
-      margin-left: auto;   /* push to the right */
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
     }
+    #contact .contact-inner .links { margin-left: auto; margin-right: auto; }
+    #contact .link { text-align: left; }
     @media (max-width: 980px) {
-      #contact .contact-inner { margin-left: 0; max-width: none; }
+      #contact .contact-inner { max-width: none; text-align: left; }
     }
 
 
