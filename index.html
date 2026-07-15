@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
     :root {
       --void:      #05070E;
       --deep:      #080C18;
@@ -19,21 +19,21 @@
       --surface-2: #111B33;
       --line:      #1B2842;
       --line-dim:  #141E36;
-
+ 
       --blue:      #3B7BFF;
       --blue-hi:   #6098FF;
       --blue-dim:  #1E3766;
-
+ 
       --text:      #E7ECF6;
       --text-soft: #A6B2C9;
       --muted:     #68758F;
-
+ 
       --radius: 4px;
       --rail: 0px;
     }
-
+ 
     html { scroll-behavior: smooth; }
-
+ 
     body {
       background: var(--void);
       color: var(--text);
@@ -43,7 +43,7 @@
       overflow-x: hidden;
       position: relative;
     }
-
+ 
     /* ambient blue field */
     body::before {
       content: '';
@@ -70,13 +70,13 @@
       mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 78%);
       -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 78%);
     }
-
+ 
     nav, section, footer, .rail, .overlay, .edit-banner { position: relative; z-index: 2; }
-
+ 
     ::selection { background: var(--blue); color: #fff; }
     a { color: inherit; }
     :focus-visible { outline: 2px solid var(--blue-hi); outline-offset: 3px; }
-
+ 
     .mono {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 11px;
@@ -84,7 +84,7 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-
+ 
     /* ── TIMELINE PROGRESS BAR (top) ── */
     .rail {
       position: fixed;
@@ -123,7 +123,7 @@
       font-variant-numeric: tabular-nums;
       pointer-events: none;
     }
-
+ 
     /* ── NAV ── */
     nav {
       position: fixed;
@@ -161,11 +161,11 @@
       background: var(--blue);
       box-shadow: 0 0 8px rgba(59,123,255,0.8);
     }
-
+ 
     /* ── LAYOUT ── */
     .wrap { padding-left: 56px; padding-right: 40px; max-width: 1440px; margin: 0 auto; }
     section { scroll-margin-top: 80px; }
-
+ 
     /* ── HERO ── */
     #hero {
       min-height: 100svh;
@@ -193,7 +193,7 @@
       background: var(--blue);
       box-shadow: 0 0 10px rgba(59,123,255,0.9);
     }
-
+ 
     .hero-h1 {
       font-family: 'Instrument Serif', serif;
       font-weight: 400;
@@ -210,7 +210,7 @@
       margin-top: 12px;
       letter-spacing: -0.01em;
     }
-
+ 
     .hero-desc {
       font-size: clamp(16px, 1.55vw, 20px);
       line-height: 1.62;
@@ -220,9 +220,9 @@
       font-weight: 300;
     }
     .hero-desc strong { font-weight: 500; color: var(--text); }
-
+ 
     .hero-actions { display: flex; align-items: center; gap: 18px; margin-top: 40px; flex-wrap: wrap; }
-
+ 
     .btn {
       display: inline-flex;
       align-items: center;
@@ -249,7 +249,7 @@
     }
     .btn-ghost { color: var(--text-soft); border: 1px solid var(--line); }
     .btn-ghost:hover { border-color: var(--blue); color: var(--text); }
-
+ 
     /* ── CAPABILITY STRIP ── */
     .strip { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line-dim); margin-top: 62px; }
     .strip-item { flex: 1 1 190px; padding: 18px 24px 18px 0; border-right: 1px solid var(--line-dim); }
@@ -264,7 +264,7 @@
       margin-bottom: 7px;
     }
     .strip-item p { font-size: 14px; color: var(--text-soft); font-weight: 300; line-height: 1.45; }
-
+ 
     /* ── SECTION HEAD ── */
     .sec-head {
       display: flex;
@@ -282,11 +282,11 @@
       letter-spacing: -0.01em;
     }
     .sec-title em { font-style: italic; color: var(--blue-hi); }
-
+ 
     /* ── WORK ── */
     #work { padding-top: 120px; padding-bottom: 40px; }
     .video-card { margin-bottom: 54px; }
-
+ 
     .frame {
       position: relative;
       width: 100%;
@@ -307,7 +307,7 @@
       width: 100%; height: 100%;
       border: 0;
     }
-
+ 
     .ph {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -325,7 +325,7 @@
       text-transform: uppercase;
     }
     .ph.hidden { display: none; }
-
+ 
     .meta {
       display: flex;
       align-items: baseline;
@@ -352,11 +352,11 @@
       white-space: nowrap;
     }
     .featured .meta-title { font-size: 20px; }
-
+ 
     .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
     .grid-2 .video-card { margin-bottom: 40px; }
-
-
+ 
+ 
     /* vertical row */
     .vert-row {
       display: flex;
@@ -364,13 +364,15 @@
       padding-top: 8px;
     }
     .vert-row .video-card { width: 100%; max-width: 340px; }
-
+ 
     /* vertical pair: fit within viewport height, width follows */
     .grid-verticals { align-items: start; }
     .grid-verticals .video-card {
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-width: 0;            /* allow the flex/grid child to shrink */
+      overflow: hidden;        /* safety against sub-pixel spill */
     }
     .grid-verticals .frame.tall {
       padding-top: 0;                 /* drop the padding-ratio trick */
@@ -380,10 +382,10 @@
       max-width: 100%;
     }
     .grid-verticals .frame.tall iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .grid-verticals .meta { width: min(82vh * 9 / 16, 100%); }
-
-
-
+    .grid-verticals .meta { width: 100%; max-width: min(405px, 100%); }
+ 
+ 
+ 
     /* ── CONTACT ── */
     #contact { padding-top: 110px; padding-bottom: 90px; border-top: 1px solid var(--line-dim); }
     .contact-h {
@@ -428,7 +430,7 @@
     }
     .link-name { font-size: 15px; color: var(--text); transition: color 0.18s; }
     .link-arrow { font-size: 15px; color: var(--muted); transition: transform 0.22s, color 0.18s; }
-
+ 
     /* contact centred on wide screens */
     #contact .contact-inner {
       max-width: 720px;
@@ -441,8 +443,8 @@
     @media (max-width: 980px) {
       #contact .contact-inner { max-width: none; text-align: left; }
     }
-
-
+ 
+ 
     /* ── FOOTER ── */
     footer {
       display: flex;
@@ -457,7 +459,7 @@
       color: var(--muted);
       max-width: 1440px;
     }
-
+ 
     /* ── EDIT MODE ── */
     .edit-btn { display: none; }
     body.edit-mode .edit-btn {
@@ -478,7 +480,7 @@
       transition: all 0.18s;
     }
     body.edit-mode .edit-btn:hover { color: var(--blue-hi); border-color: var(--blue); }
-
+ 
     .edit-banner { display: none; }
     body.edit-mode .edit-banner {
       display: block;
@@ -494,7 +496,7 @@
       padding: 9px 13px;
       border-radius: var(--radius);
     }
-
+ 
     /* ── MODAL ── */
     .overlay {
       display: none;
@@ -550,17 +552,17 @@
     .m-btn:hover { border-color: var(--blue); color: var(--text); }
     .m-btn.go { background: var(--blue); color: #fff; border-color: var(--blue); }
     .m-btn.go:hover { background: var(--blue-hi); border-color: var(--blue-hi); }
-
+ 
     /* ── REVEAL ── */
     .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.in { opacity: 1; transform: none; }
-
+ 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       .reveal { opacity: 1; transform: none; transition: none; }
       .rail-head { transition: none; }
     }
-
+ 
     /* ── RESPONSIVE ── */
     @media (max-width: 980px) {
       .grid-2 { grid-template-columns: 1fr; gap: 0; }
@@ -575,6 +577,14 @@
       #work { padding-top: 80px; }
       .nav-right { gap: 16px; }
       body::after { background-size: 48px 48px; }
+ 
+      /* vertical videos: constrain by WIDTH on phones so they never overflow */
+      .grid-verticals .frame.tall {
+        height: auto;
+        width: 100%;
+        max-width: 100%;
+      }
+      .grid-verticals .meta { width: 100%; }
     }
   </style>
 </head>
